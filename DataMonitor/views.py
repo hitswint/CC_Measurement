@@ -7,7 +7,7 @@ from django.conf import settings
 from DataMonitor.models import GY_39_Category, GY_39
 import logging
 from django.views.decorators.csrf import csrf_exempt
-# import sqlite3
+import sqlite3
 # 查看tables：apt安装sqlite3，然后sqlite3 db.sqlite3，输入.tables。
 import matplotlib.pyplot as plt
 # import os
@@ -24,7 +24,9 @@ def index(request):
     if request.method == 'POST':
         Sensor_name = request.POST.get("Sensor_name", "")
 
-        if not GY_39_Category.objects.get(name=Sensor_name):
+        try:
+            GY_39_Category.objects.get(name=Sensor_name)
+        except GY_39_Category.DoesNotExist:
             add_GY_39_Category = GY_39_Category(
                 name=Sensor_name,
                 url=reverse('GY-39-view', args=(Sensor_name, )))
@@ -43,36 +45,11 @@ def index(request):
     else:
         GY_39_Category_list = GY_39_Category.objects.all()
         GY_39_list = [
-            category_object.GY_39_set.order_by('Time').all()[0]
+            category_object.gy_39_set.order_by('-Time').all()[0]
             for category_object in GY_39_Category_list
         ]
         return render_to_response('DataMonitor/index.html',
                                   {'GY_39_list': GY_39_list})
-
-
-# def index_plot(request):
-#     # 从sqlite中获取数据。
-#     conn = sqlite3.connect('db.sqlite3')
-#     cur = conn.cursor()
-#     cur.execute("SELECT * FROM TM_Temperature")
-#     data = cur.fetchall()
-#     data_0 = [int(row[0]) for row in data][-500:]
-#     data_2 = [float(row[2]) for row in data][-500:]
-
-#     plot_file = 'static/TM/plot.png'
-#     fig1, ax1 = plt.subplots(figsize=(8, 4), dpi=98)
-#     ax1.set_title(u'房间温度', fontproperties='KaiTi')
-#     ax1.set_xlabel(u'时间(小时)', fontproperties='KaiTi')
-#     ax1.set_ylabel(u'温度(\u2103)', fontproperties='KaiTi')
-#     plt.ylim(-30, 30)
-#     ax1.plot(
-#         data_0,
-#         data_2, )
-#     fig1.savefig(plot_file)
-#     plt.close(fig1)
-
-#     # temperature_list = Temperature.objects.all()
-#     return HttpResponse(plot_file)
 
 
 # * Base_Mixin
@@ -95,11 +72,77 @@ class GY_39_View(Base_Mixin, ListView):
     template_name = 'DataMonitor/GY-39.html'
     context_object_name = 'GY_39_list'
 
+    def get(self, request, *args, **kwargs):
+        category_name = self.kwargs.get('name', '')
+        conn = sqlite3.connect('db.sqlite3')
+        cur = conn.cursor()
+        # 通过sqlite3查询可知，外键项名称为Category_id，但值为to_field指定。
+        cur.execute(
+            'SELECT * FROM DataMonitor_gy_39 WHERE Category_id=:category_name',
+            {'category_name': category_name})
+
+        data = cur.fetchall()
+        data_i = [int(row[0]) for row in data][-500:]
+        data_T = [float(row[2]) for row in data][-500:]
+        data_H = [float(row[3]) for row in data][-500:]
+        data_P = [float(row[4]) for row in data][-500:]
+        data_L = [float(row[5]) for row in data][-500:]
+
+        plot_file = 'static/DataMonitor/{}.png'.format(category_name)
+        fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(11, 8.5), dpi=98)
+        p1 = plt.subplot(221)
+        p2 = plt.subplot(222)
+        p3 = plt.subplot(223)
+        p4 = plt.subplot(224)
+
+        # p1.set_title(u'温度', fontproperties='KaiTi')
+        p1.set_xlabel(u'时间(小时)', fontproperties='KaiTi')
+        p1.set_ylabel(u'温度(\u2103)', fontproperties='KaiTi')
+        # plt.ylim(-30, 30)
+        p1.plot(
+            data_i,
+            data_T, )
+
+        # p2.set_title(u'湿度', fontproperties='KaiTi')
+        p2.set_xlabel(u'时间(小时)', fontproperties='KaiTi')
+        p2.set_ylabel(u'湿度(%)', fontproperties='KaiTi')
+        # plt.ylim(-30, 30)
+        p2.plot(
+            data_i,
+            data_H, )
+
+        # p3.set_title(u'压力', fontproperties='KaiTi')
+        p3.set_xlabel(u'时间(小时)', fontproperties='KaiTi')
+        p3.set_ylabel(u'压力(P)', fontproperties='KaiTi')
+        # plt.ylim(-30, 30)
+        p3.plot(
+            data_i,
+            data_P, )
+
+        # p4.set_title(u'光照', fontproperties='KaiTi')
+        p4.set_xlabel(u'时间(小时)', fontproperties='KaiTi')
+        p4.set_ylabel(u'光照(L)', fontproperties='KaiTi')
+        # plt.ylim(-30, 30)
+        p4.plot(
+            data_i,
+            data_L, )
+
+        fig.savefig(plot_file)
+        plt.close(fig)
+
+        return super(GY_39_View, self).get(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs):
+        kwargs['Category_name'] = self.kwargs.get('name', '')
+        kwargs['plot_file'] = 'DataMonitor/{}.png'.format(
+            self.kwargs.get('name', ''))
+        return super(GY_39_View, self).get_context_data(**kwargs)
+
     def get_queryset(self):
         category = self.kwargs.get('name', '')
         try:
             GY_39_list = GY_39_Category.objects.get(
-                name=category).GY_39_set.all()
+                name=category).gy_39_set.order_by('-Time').all()
         except GY_39_Category.DoesNotExist:
             logger.error(u'[Category_View]此分类不存在:[%s]' % category)
             raise Http404

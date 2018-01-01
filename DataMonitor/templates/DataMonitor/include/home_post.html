@@ -1,32 +1,17 @@
-{% url 'GY-39-view' GY_39_Category.url as category_url %}
-
-<div class="home-post well alert clearfix" id="close_home_post">
-    <button class="close" data-dismiss="alert" type="button">&times;</button>
-    <div class="post-title underline clearfix">
-        <h1>
-            <a href="{{post.Category.url}}">{{post.Category.name}}</a>
-        </h1>
-        <div class="post-info">
-            <span>
-                <span class="glyphicon glyphicon-calendar"></span>
-                {{post.create_time|date:"Y-m-d" }}
-            </span>
-        </div>
+<div class="post-content row">
+    <div class="col-sm-1">
+        <a href="{{post.Category.url}}">{{post.Category.name}}</a>
     </div>
-    <div class="post-content">
-        <div class="row">
-            <div class="col-sm-4">
-                {{post.Category.name}}
-            </div>
-            <div class="col-sm-8">
-                <p>
-                    Time:{{post.Time|date:"Y-m-d" }}
-                    Temperature:{{post.Temperature}}
-                    Humidity:{{post.Humidity}}
-                    Pressure:{{post.Pressure}}
-                    Luminance:{{post.Luminance}}
-                </p>
-            </div>
-        </div>
+    <div class="col-sm-1">
+        --->
+    </div>
+    <div class="col-sm-10">
+        <p>
+            Time:{{post.Time|date:"Y-m-d H:i:s"}}
+            Temperature:{{post.Temperature}}
+            Humidity:{{post.Humidity}}
+            Pressure:{{post.Pressure}}
+            Luminance:{{post.Luminance}}
+        </p>
     </div>
 </div>

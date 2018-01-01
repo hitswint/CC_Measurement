@@ -38,7 +38,7 @@ class GY_39(models.Model):
 
     class Meta():
         ordering = [
-            'Time',
+            '-Time',
         ]
 
     def __unicode__(self):
