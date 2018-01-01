@@ -9,10 +9,11 @@ import logging
 from django.views.decorators.csrf import csrf_exempt
 import sqlite3
 # 查看tables：apt安装sqlite3，然后sqlite3 db.sqlite3，输入.tables。
-import matplotlib.pyplot as plt
 # import os
-# matplotlib.use('Agg')
-# import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib
+# 若不加，服务器运行显示no display name and no $display environment variable。
+matplotlib.use('Agg')
 
 logger = logging.getLogger(__name__)
 
@@ -96,32 +97,32 @@ class GY_39_View(Base_Mixin, ListView):
         p4 = plt.subplot(224)
 
         # p1.set_title(u'温度', fontproperties='KaiTi')
-        p1.set_xlabel(u'时间(小时)', fontproperties='KaiTi')
-        p1.set_ylabel(u'温度(\u2103)', fontproperties='KaiTi')
+        p1.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
+        p1.set_ylabel(u'Temperature(\u2103)', fontproperties='KaiTi')
         # plt.ylim(-30, 30)
         p1.plot(
             data_i,
             data_T, )
 
         # p2.set_title(u'湿度', fontproperties='KaiTi')
-        p2.set_xlabel(u'时间(小时)', fontproperties='KaiTi')
-        p2.set_ylabel(u'湿度(%)', fontproperties='KaiTi')
+        p2.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
+        p2.set_ylabel(u'Humidity(%)', fontproperties='KaiTi')
         # plt.ylim(-30, 30)
         p2.plot(
             data_i,
             data_H, )
 
         # p3.set_title(u'压力', fontproperties='KaiTi')
-        p3.set_xlabel(u'时间(小时)', fontproperties='KaiTi')
-        p3.set_ylabel(u'压力(P)', fontproperties='KaiTi')
+        p3.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
+        p3.set_ylabel(u'Pressure(P)', fontproperties='KaiTi')
         # plt.ylim(-30, 30)
         p3.plot(
             data_i,
             data_P, )
 
         # p4.set_title(u'光照', fontproperties='KaiTi')
-        p4.set_xlabel(u'时间(小时)', fontproperties='KaiTi')
-        p4.set_ylabel(u'光照(L)', fontproperties='KaiTi')
+        p4.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
+        p4.set_ylabel(u'Luminance(L)', fontproperties='KaiTi')
         # plt.ylim(-30, 30)
         p4.plot(
             data_i,
