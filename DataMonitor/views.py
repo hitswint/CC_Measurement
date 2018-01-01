@@ -8,6 +8,7 @@ from DataMonitor.models import GY_39_Category, GY_39
 import logging
 from django.views.decorators.csrf import csrf_exempt
 import sqlite3
+import time
 # 查看tables：apt安装sqlite3，然后sqlite3 db.sqlite3，输入.tables。
 # import os
 import matplotlib
@@ -83,48 +84,66 @@ class GY_39_View(Base_Mixin, ListView):
             {'category_name': category_name})
 
         data = cur.fetchall()
-        data_i = [int(row[0]) for row in data][-500:]
-        data_T = [float(row[2]) for row in data][-500:]
-        data_H = [float(row[3]) for row in data][-500:]
-        data_P = [float(row[4]) for row in data][-500:]
-        data_L = [float(row[5]) for row in data][-500:]
+        data_i = range(len([int(row[0]) for row in data]))
+        # 先把str转为time类型，再转成需要的str。
+        data_Time = [
+            time.strftime('%m/%d\n%H:%M',
+                          time.strptime(row[1].split('.')[0],
+                                        '%Y-%m-%d %H:%M:%S')) for row in data
+        ]
+        data_T = [float(row[2]) for row in data]
+        data_H = [float(row[3]) for row in data]
+        data_P = [float(row[4]) for row in data]
+        data_L = [float(row[5]) for row in data]
 
         plot_file = 'static/DataMonitor/{}.png'.format(category_name)
-        fig, axes = plt.subplots(nrows=2, ncols=2, figsize=(11, 8.5), dpi=98)
-        p1 = plt.subplot(221)
-        p2 = plt.subplot(222)
-        p3 = plt.subplot(223)
-        p4 = plt.subplot(224)
+        fig = plt.figure(figsize=(11, 8.5), dpi=98)
+        ax1 = fig.add_subplot(221)
+        ax2 = fig.add_subplot(222)
+        ax3 = fig.add_subplot(223)
+        ax4 = fig.add_subplot(224)
+        # p1 = plt.subplot(221)
+        # p2 = plt.subplot(222)
+        # p3 = plt.subplot(223)
+        # p4 = plt.subplot(224)
 
         # p1.set_title(u'温度', fontproperties='KaiTi')
-        p1.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
-        p1.set_ylabel(u'Temperature(\u2103)', fontproperties='KaiTi')
+        ax1.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
+        ax1.set_ylabel(u'Temperature(\u2103)', fontproperties='KaiTi')
+        ax1.set_xticks(data_i)
+        ax1.set_xticklabels(data_Time)
         # plt.ylim(-30, 30)
-        p1.plot(
+        ax1.plot(
             data_i,
             data_T, )
 
         # p2.set_title(u'湿度', fontproperties='KaiTi')
-        p2.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
-        p2.set_ylabel(u'Humidity(%)', fontproperties='KaiTi')
+        ax2.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
+        ax2.set_ylabel(u'Humidity(%)', fontproperties='KaiTi')
+        ax2.set_xticks(data_i)
+        ax2.set_xticklabels(data_Time)
         # plt.ylim(-30, 30)
-        p2.plot(
+        ax2.plot(
             data_i,
             data_H, )
 
         # p3.set_title(u'压力', fontproperties='KaiTi')
-        p3.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
-        p3.set_ylabel(u'Pressure(P)', fontproperties='KaiTi')
+        ax3.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
+        ax3.set_ylabel(u'Pressure(P)', fontproperties='KaiTi')
+        ax3.set_xticks(data_i)
+        ax3.set_xticklabels(data_Time)
         # plt.ylim(-30, 30)
-        p3.plot(
+        ax3.plot(
             data_i,
             data_P, )
 
         # p4.set_title(u'光照', fontproperties='KaiTi')
-        p4.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
-        p4.set_ylabel(u'Luminance(L)', fontproperties='KaiTi')
+        ax4.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
+        ax4.set_ylabel(u'Luminance(L)', fontproperties='KaiTi')
+        ax4.set_xticks(data_i)
+        ax4.set_xticklabels(data_Time)
         # plt.ylim(-30, 30)
-        p4.plot(
+        ax4.plot(
             data_i,
             data_L, )
 
