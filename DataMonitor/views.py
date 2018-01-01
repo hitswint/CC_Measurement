@@ -84,20 +84,20 @@ class GY_39_View(Base_Mixin, ListView):
             {'category_name': category_name})
 
         data = cur.fetchall()
-        data_i = range(len([int(row[0]) for row in data]))
+        data_i = range(len([int(row[0]) for row in data]))[-20:]
         # 先把str转为time类型，再转成需要的str。
         data_Time = [
             time.strftime('%m/%d\n%H:%M',
                           time.strptime(row[1].split('.')[0],
                                         '%Y-%m-%d %H:%M:%S')) for row in data
-        ]
-        data_T = [float(row[2]) for row in data]
-        data_H = [float(row[3]) for row in data]
-        data_P = [float(row[4]) for row in data]
-        data_L = [float(row[5]) for row in data]
+        ][-20:]
+        data_T = [float(row[2]) for row in data][-20:]
+        data_H = [float(row[3]) for row in data][-20:]
+        data_P = [float(row[4]) for row in data][-20:]
+        data_L = [float(row[5]) for row in data][-20:]
 
         plot_file = 'static/DataMonitor/{}.png'.format(category_name)
-        fig = plt.figure(figsize=(11, 8.5), dpi=98)
+        fig = plt.figure(figsize=(19, 8), dpi=98)
         ax1 = fig.add_subplot(221)
         ax2 = fig.add_subplot(222)
         ax3 = fig.add_subplot(223)
@@ -115,7 +115,7 @@ class GY_39_View(Base_Mixin, ListView):
         # plt.ylim(-30, 30)
         ax1.plot(
             data_i,
-            data_T, )
+            data_T, 'r:o', linewidth=1.2)
 
         # p2.set_title(u'湿度', fontproperties='KaiTi')
         ax2.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
@@ -125,7 +125,7 @@ class GY_39_View(Base_Mixin, ListView):
         # plt.ylim(-30, 30)
         ax2.plot(
             data_i,
-            data_H, )
+            data_H, 'b--s', linewidth=1.2)
 
         # p3.set_title(u'压力', fontproperties='KaiTi')
         ax3.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
@@ -135,7 +135,7 @@ class GY_39_View(Base_Mixin, ListView):
         # plt.ylim(-30, 30)
         ax3.plot(
             data_i,
-            data_P, )
+            data_P, 'g-.*', linewidth=1.2)
 
         # p4.set_title(u'光照', fontproperties='KaiTi')
         ax4.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
@@ -145,8 +145,9 @@ class GY_39_View(Base_Mixin, ListView):
         # plt.ylim(-30, 30)
         ax4.plot(
             data_i,
-            data_L, )
+            data_L, 'y-d', linewidth=1.2)
 
+        fig.tight_layout()
         fig.savefig(plot_file)
         plt.close(fig)
 
