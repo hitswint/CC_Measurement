@@ -10,10 +10,10 @@ from django.views.decorators.csrf import csrf_exempt
 import sqlite3
 # 查看tables：apt安装sqlite3，然后sqlite3 db.sqlite3，输入.tables。
 # import os
-import matplotlib.pyplot as plt
 import matplotlib
 # 若不加，服务器运行显示no display name and no $display environment variable。
 matplotlib.use('Agg')
+import matplotlib.pyplot as plt  # 需在上句后引用。
 
 logger = logging.getLogger(__name__)
 
