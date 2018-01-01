@@ -8,7 +8,10 @@ from DataMonitor.models import GY_39_Category, GY_39
 import logging
 from django.views.decorators.csrf import csrf_exempt
 import sqlite3
-import time
+# from django.utils import timezone
+# import pytz
+# import time
+from datetime import datetime, timedelta, timezone
 # 查看tables：apt安装sqlite3，然后sqlite3 db.sqlite3，输入.tables。
 # import os
 import matplotlib
@@ -85,11 +88,20 @@ class GY_39_View(Base_Mixin, ListView):
 
         data = cur.fetchall()
         data_i = range(len([int(row[0]) for row in data]))[-20:]
+
+        # 处理时间有time和datetime两个模块，后者更好用。
         # 先把str转为time类型，再转成需要的str。
+        # data_Time = [
+        #     time.strftime('%m/%d\n%H:%M', (time.strptime(
+        #         row[1].split('.')[0], '%Y-%m-%d %H:%M:%S'))) for row in data
+        # ][-20:]
+        # 取数据库里的时间str，转化为datetime，并强制添加utc时区信息，再转换为local时区。
         data_Time = [
-            time.strftime('%m/%d\n%H:%M',
-                          time.strptime(row[1].split('.')[0],
-                                        '%Y-%m-%d %H:%M:%S')) for row in data
+            datetime.strptime(
+                row[1].split('.')[0], '%Y-%m-%d %H:%M:%S').replace(
+                    tzinfo=timezone.utc).astimezone(
+                        timezone(timedelta(hours=8))).strftime('%m/%d\n%H:%M')
+            for row in data
         ][-20:]
         data_T = [float(row[2]) for row in data][-20:]
         data_H = [float(row[3]) for row in data][-20:]
@@ -113,9 +125,7 @@ class GY_39_View(Base_Mixin, ListView):
         ax1.set_xticks(data_i)
         ax1.set_xticklabels(data_Time)
         # plt.ylim(-30, 30)
-        ax1.plot(
-            data_i,
-            data_T, 'r:o', linewidth=1.2)
+        ax1.plot(data_i, data_T, 'r:o', linewidth=1.2)
 
         # p2.set_title(u'湿度', fontproperties='KaiTi')
         ax2.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
@@ -123,9 +133,7 @@ class GY_39_View(Base_Mixin, ListView):
         ax2.set_xticks(data_i)
         ax2.set_xticklabels(data_Time)
         # plt.ylim(-30, 30)
-        ax2.plot(
-            data_i,
-            data_H, 'b--s', linewidth=1.2)
+        ax2.plot(data_i, data_H, 'b--s', linewidth=1.2)
 
         # p3.set_title(u'压力', fontproperties='KaiTi')
         ax3.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
@@ -133,9 +141,7 @@ class GY_39_View(Base_Mixin, ListView):
         ax3.set_xticks(data_i)
         ax3.set_xticklabels(data_Time)
         # plt.ylim(-30, 30)
-        ax3.plot(
-            data_i,
-            data_P, 'g-.*', linewidth=1.2)
+        ax3.plot(data_i, data_P, 'g-.*', linewidth=1.2)
 
         # p4.set_title(u'光照', fontproperties='KaiTi')
         ax4.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
@@ -143,9 +149,7 @@ class GY_39_View(Base_Mixin, ListView):
         ax4.set_xticks(data_i)
         ax4.set_xticklabels(data_Time)
         # plt.ylim(-30, 30)
-        ax4.plot(
-            data_i,
-            data_L, 'y-d', linewidth=1.2)
+        ax4.plot(data_i, data_L, 'y-d', linewidth=1.2)
 
         fig.tight_layout()
         fig.savefig(plot_file)
