@@ -102,11 +102,11 @@ class GY_39_View(Base_Mixin, ListView):
                     tzinfo=timezone.utc).astimezone(
                         timezone(timedelta(hours=8))).strftime('%m/%d\n%H:%M')
             for row in data
-        ][-20:]
-        data_T = [float(row[2]) for row in data][-20:]
-        data_H = [float(row[3]) for row in data][-20:]
-        data_P = [float(row[4]) for row in data][-20:]
-        data_L = [float(row[5]) for row in data][-20:]
+        ][-288:]
+        data_T = [float(row[2]) for row in data][-288:]
+        data_H = [float(row[3]) for row in data][-288:]
+        data_P = [float(row[4]) for row in data][-288:]
+        data_L = [float(row[5]) for row in data][-288:]
 
         plot_file = 'static/DataMonitor/{}.png'.format(category_name)
         fig = plt.figure(figsize=(19, 8), dpi=98)
@@ -122,32 +122,32 @@ class GY_39_View(Base_Mixin, ListView):
         # p1.set_title(u'温度', fontproperties='KaiTi')
         ax1.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
         ax1.set_ylabel(u'Temperature(\u2103)', fontproperties='KaiTi')
-        ax1.set_xticks(data_i)
-        ax1.set_xticklabels(data_Time)
+        ax1.set_xticks(data_i[::12])
+        ax1.set_xticklabels(data_Time[::12])
         # plt.ylim(-30, 30)
         ax1.plot(data_i, data_T, 'r:o', linewidth=1.2)
 
         # p2.set_title(u'湿度', fontproperties='KaiTi')
         ax2.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
         ax2.set_ylabel(u'Humidity(%)', fontproperties='KaiTi')
-        ax2.set_xticks(data_i)
-        ax2.set_xticklabels(data_Time)
+        ax2.set_xticks(data_i[::12])
+        ax2.set_xticklabels(data_Time[::12])
         # plt.ylim(-30, 30)
         ax2.plot(data_i, data_H, 'b--s', linewidth=1.2)
 
         # p3.set_title(u'压力', fontproperties='KaiTi')
         ax3.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
         ax3.set_ylabel(u'Pressure(P)', fontproperties='KaiTi')
-        ax3.set_xticks(data_i)
-        ax3.set_xticklabels(data_Time)
+        ax3.set_xticks(data_i[::12])
+        ax3.set_xticklabels(data_Time[::12])
         # plt.ylim(-30, 30)
         ax3.plot(data_i, data_P, 'g-.*', linewidth=1.2)
 
         # p4.set_title(u'光照', fontproperties='KaiTi')
         ax4.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
         ax4.set_ylabel(u'Luminance(L)', fontproperties='KaiTi')
-        ax4.set_xticks(data_i)
-        ax4.set_xticklabels(data_Time)
+        ax4.set_xticks(data_i[::12])
+        ax4.set_xticklabels(data_Time[::12])
         # plt.ylim(-30, 30)
         ax4.plot(data_i, data_L, 'y-d', linewidth=1.2)
 
