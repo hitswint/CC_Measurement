@@ -87,7 +87,7 @@ class GY_39_View(Base_Mixin, ListView):
             {'category_name': category_name})
 
         data = cur.fetchall()
-        data_i = range(len([int(row[0]) for row in data]))[-20:]
+        data_i = range(len([int(row[0]) for row in data]))[-288:]
 
         # 处理时间有time和datetime两个模块，后者更好用。
         # 先把str转为time类型，再转成需要的str。
