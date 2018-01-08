@@ -42,6 +42,6 @@ class GY_39(models.Model):
         ]
 
     def __unicode__(self):
-        return self.time
+        return self.Time
 
     __str__ = __unicode__

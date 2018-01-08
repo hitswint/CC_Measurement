@@ -1,19 +1,20 @@
 # from django.shortcuts import render
 from django.shortcuts import render_to_response
-from django.http import HttpResponse
+from django.http import HttpResponse, Http404
 from django.core.urlresolvers import reverse
-from django.views.generic import ListView
+from django.views.generic import ListView, DetailView
 from django.conf import settings
 from DataMonitor.models import GY_39_Category, GY_39
 import logging
 from django.views.decorators.csrf import csrf_exempt
+import glob
 import sqlite3
 # from django.utils import timezone
 # import pytz
 # import time
 from datetime import datetime, timedelta, timezone
 # 查看tables：apt安装sqlite3，然后sqlite3 db.sqlite3，输入.tables。
-# import os
+import os
 import matplotlib
 # 若不加，服务器运行显示no display name and no $display environment variable。
 matplotlib.use('Agg')
@@ -173,3 +174,51 @@ class GY_39_View(Base_Mixin, ListView):
             raise Http404
 
         return GY_39_list
+
+
+# * ota_version
+class OtaVersionView(Base_Mixin, DetailView):
+    """view for category.html"""
+
+    def get(self, request, *args, **kwargs):
+        # 列出文件下所有文件：listdir("./")。
+        Sensor_name = self.kwargs.get('Sensor_name', '')
+        try:
+            new_ver = sorted(
+                glob.glob("Fota/{Sensor_name}-*.bin".format(
+                    Sensor_name=Sensor_name)))[-1][-12:-4]
+        except IndexError:
+            new_ver = 0
+        return HttpResponse(new_ver)
+
+
+    # * ota_update
+class OtaUpdateView(Base_Mixin, DetailView):
+    """view for category.html"""
+
+    def get(self, request, *args, **kwargs):
+        Sensor_name = kwargs.get('Sensor_name', '')
+        # request.META字典保存着request中的headers。
+        # Version = request.META.get('X_ESP8266_VERSION', '')
+        filepath = sorted(
+            glob.glob("Fota/{Sensor_name}-*.bin".format(
+                Sensor_name=Sensor_name)))[-1]
+        # .split("/")
+
+        response = HttpResponse(
+            file_iterator(filepath), content_type='application/octet-stream')
+        response[
+            'Content-Disposition'] = 'attachment; filename=%s' % os.path.basename(
+                filepath)
+        response['Content-Length'] = os.path.getsize(filepath)  #传输给客户端的文件大小
+        return response
+
+
+def file_iterator(file_name, chunk_size=512):
+    with open(file_name, "rb") as f:
+        while True:
+            c = f.read(chunk_size)
+            if c:
+                yield c
+            else:
+                break
