@@ -19,6 +19,8 @@ import matplotlib
 # 若不加，服务器运行显示no display name and no $display environment variable。
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt  # 需在上句后引用。
+from matplotlib.dates import DayLocator, HourLocator, DateFormatter
+from numpy import arange
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +90,7 @@ class GY_39_View(Base_Mixin, ListView):
             {'category_name': category_name})
 
         data = cur.fetchall()
-        data_i = range(len([int(row[0]) for row in data]))[-288:]
+        data_i = range(len([int(row[0]) for row in data]))
 
         # 处理时间有time和datetime两个模块，后者更好用。
         # 先把str转为time类型，再转成需要的str。
@@ -98,59 +100,70 @@ class GY_39_View(Base_Mixin, ListView):
         # ][-20:]
         # 取数据库里的时间str，转化为datetime，并强制添加utc时区信息，再转换为local时区。
         data_Time = [
-            datetime.strptime(
-                row[1].split('.')[0], '%Y-%m-%d %H:%M:%S').replace(
-                    tzinfo=timezone.utc).astimezone(
-                        timezone(timedelta(hours=8))).strftime('%m/%d\n%H:%M')
+            datetime.strptime(row[1].split('.')[0], '%Y-%m-%d %H:%M:%S') +
+            timedelta(hours=8)
+            # .replace(tzinfo=timezone.utc).astimezone(timezone(timedelta(hours=8))).strftime('%m/%d\n%H:%M')
             for row in data
-        ][-288:]
-        data_T = [float(row[2]) for row in data][-288:]
-        data_H = [float(row[3]) for row in data][-288:]
-        data_P = [float(row[4]) for row in data][-288:]
-        data_L = [float(row[5]) for row in data][-288:]
+        ]
+        data_T = [float(row[2]) for row in data]
+        data_H = [float(row[3]) for row in data]
+        data_P = [float(row[4]) for row in data]
+        data_L = [float(row[5]) for row in data]
 
         plot_file = 'static/DataMonitor/{}.png'.format(category_name)
-        fig = plt.figure(figsize=(19, 8), dpi=98)
-        ax1 = fig.add_subplot(221)
-        ax2 = fig.add_subplot(222)
-        ax3 = fig.add_subplot(223)
-        ax4 = fig.add_subplot(224)
+        fig = plt.figure(figsize=(19, 16), dpi=98)
+        ax1 = fig.add_subplot(411)
+        ax2 = fig.add_subplot(412)
+        ax3 = fig.add_subplot(413)
+        ax4 = fig.add_subplot(414)
         # p1 = plt.subplot(221)
         # p2 = plt.subplot(222)
         # p3 = plt.subplot(223)
         # p4 = plt.subplot(224)
 
         # p1.set_title(u'温度', fontproperties='KaiTi')
-        ax1.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
+        ax1.set_xlabel(u'Time(h)', fontproperties='KaiTi')
         ax1.set_ylabel(u'Temperature(\u2103)', fontproperties='KaiTi')
-        ax1.set_xticks(data_i[::12])
-        ax1.set_xticklabels(data_Time[::12])
+        # ax1.set_xticks(data_i[::24])
+        # ax1.set_xticklabels(data_Time[::24], fontsize=8)
         # plt.ylim(-30, 30)
-        ax1.plot(data_i, data_T, 'r:o', linewidth=1.2)
+        ax1.xaxis.set_major_locator(DayLocator())
+        ax1.xaxis.set_minor_locator(HourLocator(arange(0, 25, 6)))
+        ax1.xaxis.set_major_formatter(DateFormatter('%m/%d\n%H:%M'))
+        ax1.plot(data_Time, data_T, 'r:o', linewidth=1.2)
 
         # p2.set_title(u'湿度', fontproperties='KaiTi')
-        ax2.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
+        ax2.set_xlabel(u'Time(h)', fontproperties='KaiTi')
         ax2.set_ylabel(u'Humidity(%)', fontproperties='KaiTi')
-        ax2.set_xticks(data_i[::12])
-        ax2.set_xticklabels(data_Time[::12])
+        # ax2.set_xticks(data_i[::24])
+        # ax2.set_xticklabels(data_Time[::24], fontsize=8)
         # plt.ylim(-30, 30)
-        ax2.plot(data_i, data_H, 'b--s', linewidth=1.2)
+        ax2.xaxis.set_major_locator(DayLocator())
+        ax2.xaxis.set_minor_locator(HourLocator(arange(0, 25, 6)))
+        ax2.xaxis.set_major_formatter(DateFormatter('%m/%d\n%H:%M'))
+        ax2.plot(data_Time, data_H, 'b--s', linewidth=1.2)
 
         # p3.set_title(u'压力', fontproperties='KaiTi')
-        ax3.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
+        ax3.set_xlabel(u'Time(h)', fontproperties='KaiTi')
         ax3.set_ylabel(u'Pressure(P)', fontproperties='KaiTi')
-        ax3.set_xticks(data_i[::12])
-        ax3.set_xticklabels(data_Time[::12])
+        # ax3.set_xticks(data_i[::24])
+        # ax3.set_xticklabels(data_Time[::24], fontsize=8)
         # plt.ylim(-30, 30)
-        ax3.plot(data_i, data_P, 'g-.*', linewidth=1.2)
+        ax3.xaxis.set_major_locator(DayLocator())
+        ax3.xaxis.set_minor_locator(HourLocator(arange(0, 25, 6)))
+        ax3.xaxis.set_major_formatter(DateFormatter('%m/%d\n%H:%M'))
+        ax3.plot(data_Time, data_P, 'g-.*', linewidth=1.2)
 
         # p4.set_title(u'光照', fontproperties='KaiTi')
-        ax4.set_xlabel(u'Time(10min)', fontproperties='KaiTi')
+        ax4.set_xlabel(u'Time(h)', fontproperties='KaiTi')
         ax4.set_ylabel(u'Luminance(L)', fontproperties='KaiTi')
-        ax4.set_xticks(data_i[::12])
-        ax4.set_xticklabels(data_Time[::12])
+        # ax4.set_xticks(data_i[::24])
+        # ax4.set_xticklabels(data_Time[::24], fontsize=8)
         # plt.ylim(-30, 30)
-        ax4.plot(data_i, data_L, 'y-d', linewidth=1.2)
+        ax4.xaxis.set_major_locator(DayLocator())
+        ax4.xaxis.set_minor_locator(HourLocator(arange(0, 25, 6)))
+        ax4.xaxis.set_major_formatter(DateFormatter('%m/%d\n%H:%M'))
+        ax4.plot(data_Time, data_L, 'y-d', linewidth=1.2)
 
         fig.tight_layout()
         fig.savefig(plot_file)
