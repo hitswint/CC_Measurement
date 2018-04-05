@@ -9,6 +9,7 @@ import logging
 from django.views.decorators.csrf import csrf_exempt
 import glob
 import sqlite3
+import csv
 # from django.utils import timezone
 # import pytz
 # import time
@@ -168,6 +169,17 @@ class GY_39_View(Base_Mixin, ListView):
         fig.tight_layout()
         fig.savefig(plot_file)
         plt.close(fig)
+
+        data_file = 'static/DataMonitor/{}.csv'.format(category_name)
+        conn_data = sqlite3.connect('db.sqlite3')
+        cur_data = conn_data.cursor()
+        c_exe = cur_data.execute(
+            'SELECT * FROM DataMonitor_gy_39 WHERE Category_id=:category_name',
+            {'category_name': category_name})
+        c_data = c_exe.fetchall()
+        with open(data_file, 'w', newline='') as file:
+            for row in c_data:
+                csv.writer(file).writerow(row)
 
         return super(GY_39_View, self).get(request, *args, **kwargs)
 
